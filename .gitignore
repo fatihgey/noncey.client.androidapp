@@ -1,0 +1,17 @@
+# Build outputs
+/app/build/
+/build/
+
+# Gradle cache
+.gradle/
+local.properties
+
+# Signing — never commit these
+keystore.properties
+*.keystore
+*.jks
+
+# IDE
+.idea/
+*.iml
+.DS_Store
