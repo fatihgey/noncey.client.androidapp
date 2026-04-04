@@ -4,7 +4,8 @@ REM Usage:
 REM   build.bat             — debug APK
 REM   build.bat release     — signed release APK (requires keystore.properties)
 REM   build.bat install-emu — adb install -r to the first connected emulator
-REM   build.bat install-phone — adb install -r to the first connected physical device
+REM   build.bat install-phone   — adb install -r to the first connected physical device
+REM   build.bat uninstall-phone — adb uninstall from the first connected physical device
 
 setlocal EnableDelayedExpansion
 
@@ -19,6 +20,7 @@ REM ── Install modes ──────────────────�
 
 if "%MODE%"=="install-emu" goto :do_install
 if "%MODE%"=="install-phone" goto :do_install
+if "%MODE%"=="uninstall-phone" goto :do_uninstall
 goto :after_install
 
 :do_install
@@ -61,6 +63,32 @@ goto :after_install
 
     echo Installing !APK_PATH! on !TARGET_SERIAL!...
     "!ADB!" -s "!TARGET_SERIAL!" install -r "!APK_PATH!"
+    exit /b %ERRORLEVEL%
+
+:do_uninstall
+    set "ADB=%LOCALAPPDATA%\Android\Sdk\platform-tools\adb.exe"
+    if not exist "!ADB!" (
+        echo ERROR: adb not found at !ADB!
+        exit /b 1
+    )
+
+    REM Find the first non-emulator device
+    set "TARGET_SERIAL="
+    for /f "skip=1 tokens=1,2" %%A in ('"!ADB!" devices') do (
+        if "%%B"=="device" (
+            if "!TARGET_SERIAL!"=="" (
+                echo %%A | findstr /b "emulator" >nul || set "TARGET_SERIAL=%%A"
+            )
+        )
+    )
+
+    if "!TARGET_SERIAL!"=="" (
+        echo ERROR: No physical device found. Connect a phone with USB debugging enabled.
+        exit /b 1
+    )
+
+    echo Uninstalling com.noncey.android from !TARGET_SERIAL!...
+    "!ADB!" -s "!TARGET_SERIAL!" uninstall com.noncey.android
     exit /b %ERRORLEVEL%
 
 :after_install
