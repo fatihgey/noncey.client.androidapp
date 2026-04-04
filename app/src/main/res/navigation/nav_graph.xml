@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/smsListFragment">
+
+    <fragment
+        android:id="@+id/smsListFragment"
+        android:name="com.noncey.android.ui.sms.SmsListFragment"
+        android:label="SMS" />
+
+    <fragment
+        android:id="@+id/configsFragment"
+        android:name="com.noncey.android.ui.configs.ConfigsFragment"
+        android:label="Configs" />
+
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="com.noncey.android.ui.settings.SettingsFragment"
+        android:label="Settings" />
+
+</navigation>
