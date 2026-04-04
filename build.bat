@@ -3,14 +3,37 @@ REM Build script for noncey Android app
 REM Usage:
 REM   build.bat           — debug APK
 REM   build.bat release   — signed release APK (requires keystore.properties)
+REM   build.bat install   — adb install -r (prefers release APK, falls back to debug)
 
 setlocal EnableDelayedExpansion
 
+set ANDROID_HOME=%LOCALAPPDATA%\Android\Sdk
 set "SCRIPT_DIR=%~dp0"
 cd /d "%SCRIPT_DIR%"
 
 set "MODE=%~1"
 if "%MODE%"=="" set "MODE=debug"
+
+REM ── Install mode ─────────────────────────────────────────────────────────────
+
+if "%MODE%"=="install" (
+    set "ADB=%LOCALAPPDATA%\Android\Sdk\platform-tools\adb.exe"
+    if not exist "!ADB!" (
+        echo ERROR: adb not found at !ADB!
+        exit /b 1
+    )
+    REM Default to debug APK; pass "install release" as two args is not supported,
+    REM so we just look for whichever APK exists, preferring release.
+    set "APK_PATH=app\build\outputs\apk\release\app-release.apk"
+    if not exist "!APK_PATH!" set "APK_PATH=app\build\outputs\apk\debug\app-debug.apk"
+    if not exist "!APK_PATH!" (
+        echo ERROR: No APK found. Run 'build.bat' or 'build.bat release' first.
+        exit /b 1
+    )
+    echo Installing !APK_PATH!...
+    "!ADB!" install -r "!APK_PATH!"
+    exit /b %ERRORLEVEL%
+)
 
 REM ── Prerequisite checks ──────────────────────────────────────────────────────
 
