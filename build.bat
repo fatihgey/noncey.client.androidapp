@@ -1,9 +1,10 @@
 @echo off
 REM Build script for noncey Android app
 REM Usage:
-REM   build.bat           — debug APK
-REM   build.bat release   — signed release APK (requires keystore.properties)
-REM   build.bat install   — adb install -r (prefers release APK, falls back to debug)
+REM   build.bat             — debug APK
+REM   build.bat release     — signed release APK (requires keystore.properties)
+REM   build.bat install-emu — adb install -r to the first connected emulator
+REM   build.bat install-phone — adb install -r to the first connected physical device
 
 setlocal EnableDelayedExpansion
 
@@ -14,26 +15,55 @@ cd /d "%SCRIPT_DIR%"
 set "MODE=%~1"
 if "%MODE%"=="" set "MODE=debug"
 
-REM ── Install mode ─────────────────────────────────────────────────────────────
+REM ── Install modes ────────────────────────────────────────────────────────────
 
-if "%MODE%"=="install" (
+if "%MODE%"=="install-emu" goto :do_install
+if "%MODE%"=="install-phone" goto :do_install
+goto :after_install
+
+:do_install
     set "ADB=%LOCALAPPDATA%\Android\Sdk\platform-tools\adb.exe"
     if not exist "!ADB!" (
         echo ERROR: adb not found at !ADB!
         exit /b 1
     )
-    REM Default to debug APK; pass "install release" as two args is not supported,
-    REM so we just look for whichever APK exists, preferring release.
+
+    REM Find the target device serial from 'adb devices'
+    set "TARGET_SERIAL="
+    for /f "skip=1 tokens=1,2" %%A in ('"!ADB!" devices') do (
+        if "%%B"=="device" (
+            if "!TARGET_SERIAL!"=="" (
+                if "%MODE%"=="install-emu" (
+                    echo %%A | findstr /b "emulator" >nul && set "TARGET_SERIAL=%%A"
+                ) else (
+                    echo %%A | findstr /b "emulator" >nul || set "TARGET_SERIAL=%%A"
+                )
+            )
+        )
+    )
+
+    if "!TARGET_SERIAL!"=="" (
+        if "%MODE%"=="install-emu" (
+            echo ERROR: No emulator device found. Start an AVD and try again.
+        ) else (
+            echo ERROR: No physical device found. Connect a phone with USB debugging enabled.
+        )
+        exit /b 1
+    )
+
+    REM Resolve APK — prefer release, fall back to debug
     set "APK_PATH=app\build\outputs\apk\release\app-release.apk"
     if not exist "!APK_PATH!" set "APK_PATH=app\build\outputs\apk\debug\app-debug.apk"
     if not exist "!APK_PATH!" (
         echo ERROR: No APK found. Run 'build.bat' or 'build.bat release' first.
         exit /b 1
     )
-    echo Installing !APK_PATH!...
-    "!ADB!" install -r "!APK_PATH!"
+
+    echo Installing !APK_PATH! on !TARGET_SERIAL!...
+    "!ADB!" -s "!TARGET_SERIAL!" install -r "!APK_PATH!"
     exit /b %ERRORLEVEL%
-)
+
+:after_install
 
 REM ── Prerequisite checks ──────────────────────────────────────────────────────
 
