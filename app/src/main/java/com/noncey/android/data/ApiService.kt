@@ -5,7 +5,7 @@ import retrofit2.http.*
 
 // ── Request / response models ─────────────────────────────────────────────────
 
-data class LoginRequest(val username: String, val password: String)
+data class LoginRequest(val username: String, val password: String, val client_type: String = "android")
 data class LoginResponse(val token: String, val expires_at: String)
 
 data class ConfigResponse(
