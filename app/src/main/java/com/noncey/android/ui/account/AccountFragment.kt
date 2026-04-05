@@ -1,11 +1,6 @@
 package com.noncey.android.ui.account
 
-import android.graphics.Typeface
 import android.os.Bundle
-import android.text.SpannableString
-import android.text.Spanned
-import android.text.style.StyleSpan
-import android.text.style.TypefaceSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -50,11 +45,8 @@ class AccountFragment : Fragment() {
 
     private fun updateTitle(position: Int) {
         val sub = subTitleFull.getOrElse(position) { "Account" }
-        val full = "noncey - Account/$sub"
-        val span = SpannableString(full)
-        span.setSpan(StyleSpan(Typeface.BOLD), 0, 6, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-        span.setSpan(TypefaceSpan("sans-serif"), 0, 6, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-        (requireActivity() as? AppCompatActivity)?.supportActionBar?.title = span
+        // M2 = 3 spaces, same as MainActivity's "   $tabName" pattern
+        (requireActivity() as? AppCompatActivity)?.supportActionBar?.title = "   Account/$sub"
     }
 
     override fun onDestroyView() {
