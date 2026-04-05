@@ -7,8 +7,14 @@
         <item name="actionBarStyle">@style/Theme.Noncey.ActionBar</item>
     </style>
 
-    <style name="Theme.Noncey.ActionBar" parent="Widget.AppCompat.ActionBar">
+    <style name="Theme.Noncey.ActionBar" parent="Widget.AppCompat.ActionBar.Solid">
+        <item name="background">@color/colorPrimary</item>
+        <item name="titleTextStyle">@style/Theme.Noncey.ActionBar.Title</item>
         <item name="contentInsetStart">10dp</item>
         <item name="contentInsetStartWithNavigation">10dp</item>
+    </style>
+
+    <style name="Theme.Noncey.ActionBar.Title" parent="TextAppearance.AppCompat.Widget.ActionBar.Title">
+        <item name="android:textColor">@android:color/white</item>
     </style>
 </resources>
