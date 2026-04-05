@@ -3,6 +3,7 @@ package com.noncey.android.ui
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.noncey.android.NonceyApp
@@ -32,12 +33,18 @@ class MainActivity : AppCompatActivity() {
 
         binding.bottomNav.setupWithNavController(navController)
 
-        // M1 = 10dp set via Theme.Noncey.ActionBar contentInsetStart in themes.xml
         supportActionBar?.apply {
             setDisplayShowHomeEnabled(true)
             setDisplayUseLogoEnabled(true)
             setLogo(R.drawable.ic_noncey_logo)
         }
+
+        // M1 = 10dp: align logo with SMS list text (card margin 8dp + padding 12dp = 20dp → M1 = 10dp)
+        // Must be set on the backing Toolbar directly; ActionBar API lacks setContentInsetsAbsolute.
+        val m1 = (10 * resources.displayMetrics.density).toInt()
+        window.decorView
+            .findViewById<Toolbar>(androidx.appcompat.R.id.action_bar)
+            ?.setContentInsetsAbsolute(m1, 0)
 
         navController.addOnDestinationChangedListener { _, dest, _ ->
             val tabName = when (dest.id) {
