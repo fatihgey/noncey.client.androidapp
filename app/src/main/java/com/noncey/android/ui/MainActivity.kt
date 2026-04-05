@@ -1,12 +1,7 @@
 package com.noncey.android.ui
 
 import android.content.Intent
-import android.graphics.Typeface
 import android.os.Bundle
-import android.text.SpannableString
-import android.text.Spanned
-import android.text.style.StyleSpan
-import android.text.style.TypefaceSpan
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
@@ -37,10 +32,15 @@ class MainActivity : AppCompatActivity() {
 
         binding.bottomNav.setupWithNavController(navController)
 
+        // M1: half the horizontal inset of the first SMS-list item text
+        // SMS card marginHorizontal=8dp + card padding=12dp → text at 20dp; M1 = 10dp
+        val m1 = (10 * resources.displayMetrics.density).toInt()
+
         supportActionBar?.apply {
             setDisplayShowHomeEnabled(true)
             setDisplayUseLogoEnabled(true)
             setLogo(R.drawable.ic_noncey_logo)
+            setContentInsetsAbsolute(m1, 0)
         }
 
         navController.addOnDestinationChangedListener { _, dest, _ ->
@@ -49,11 +49,8 @@ class MainActivity : AppCompatActivity() {
                 R.id.accountFragment -> "Account"
                 else -> ""
             }
-            val full = "noncey - $tabName"
-            val span = SpannableString(full)
-            span.setSpan(StyleSpan(Typeface.BOLD), 0, 6, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-            span.setSpan(TypefaceSpan("sans-serif"), 0, 6, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-            supportActionBar?.title = span
+            // M2 = 3-char gap between icon and tab name (no dash)
+            supportActionBar?.title = "   $tabName"
         }
     }
 }
