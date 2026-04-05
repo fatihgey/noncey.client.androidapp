@@ -32,15 +32,11 @@ class MainActivity : AppCompatActivity() {
 
         binding.bottomNav.setupWithNavController(navController)
 
-        // M1: half the horizontal inset of the first SMS-list item text
-        // SMS card marginHorizontal=8dp + card padding=12dp → text at 20dp; M1 = 10dp
-        val m1 = (10 * resources.displayMetrics.density).toInt()
-
+        // M1 = 10dp set via Theme.Noncey.ActionBar contentInsetStart in themes.xml
         supportActionBar?.apply {
             setDisplayShowHomeEnabled(true)
             setDisplayUseLogoEnabled(true)
             setLogo(R.drawable.ic_noncey_logo)
-            setContentInsetsAbsolute(m1, 0)
         }
 
         navController.addOnDestinationChangedListener { _, dest, _ ->
