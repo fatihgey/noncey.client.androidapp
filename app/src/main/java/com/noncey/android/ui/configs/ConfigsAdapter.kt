@@ -40,9 +40,9 @@ class ConfigsAdapter(
                 )
             )
 
-            // Sender phones summary
-            b.tvSenders.text = if (config.senderPhones.isEmpty()) "No senders configured"
-            else config.senderPhones.joinToString(", ")
+            // Matcher info summary
+            b.tvMatcherInfo.text = if (config.senderPhones.isEmpty()) "No matcher configured"
+            else "By sender: ${config.senderPhones.joinToString(", ")}"
         }
     }
 

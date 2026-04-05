@@ -7,13 +7,8 @@
         android:title="SMS" />
 
     <item
-        android:id="@+id/configsFragment"
-        android:icon="@drawable/ic_configs"
-        android:title="Configs" />
-
-    <item
-        android:id="@+id/settingsFragment"
-        android:icon="@drawable/ic_settings"
-        android:title="Settings" />
+        android:id="@+id/accountFragment"
+        android:icon="@drawable/ic_account"
+        android:title="Account" />
 
 </menu>

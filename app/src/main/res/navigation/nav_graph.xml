@@ -10,13 +10,8 @@
         android:label="SMS" />
 
     <fragment
-        android:id="@+id/configsFragment"
-        android:name="com.noncey.android.ui.configs.ConfigsFragment"
-        android:label="Configs" />
-
-    <fragment
-        android:id="@+id/settingsFragment"
-        android:name="com.noncey.android.ui.settings.SettingsFragment"
-        android:label="Settings" />
+        android:id="@+id/accountFragment"
+        android:name="com.noncey.android.ui.account.AccountFragment"
+        android:label="Account" />
 
 </navigation>

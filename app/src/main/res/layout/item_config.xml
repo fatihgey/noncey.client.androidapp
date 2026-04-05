@@ -27,7 +27,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:textStyle="bold"
-                android:textSize="15sp" />
+                android:textSize="16sp" />
 
             <TextView
                 android:id="@+id/tvStatus"
@@ -38,7 +38,7 @@
         </LinearLayout>
 
         <TextView
-            android:id="@+id/tvSenders"
+            android:id="@+id/tvMatcherInfo"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textSize="12sp"

@@ -92,4 +92,7 @@ dependencies {
 
     // SwipeRefreshLayout
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
+
+    // ViewPager2 (Account secondary tabs)
+    implementation 'androidx.viewpager2:viewpager2:1.1.0'
 }
