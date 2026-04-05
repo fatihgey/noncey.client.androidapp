@@ -37,6 +37,12 @@ class MainActivity : AppCompatActivity() {
 
         binding.bottomNav.setupWithNavController(navController)
 
+        supportActionBar?.apply {
+            setDisplayShowHomeEnabled(true)
+            setDisplayUseLogoEnabled(true)
+            setLogo(R.drawable.ic_noncey_logo)
+        }
+
         navController.addOnDestinationChangedListener { _, dest, _ ->
             val tabName = when (dest.id) {
                 R.id.smsListFragment -> "SMS"

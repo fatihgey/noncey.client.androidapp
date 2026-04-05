@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  Adaptive icon foreground — 108×108dp viewport.
-  Safe zone: central 72dp circle (roughly 18dp inset on all sides).
-  Background layer is colorPrimary (#1a1a2e); this foreground shows a white
-  card floating over it, with asterisks and cursor in brand colour.
+  Monochrome adaptive icon layer (Android 13+).
+  All paths in white; the OS applies a tint derived from the wallpaper.
+  Uses stroke-only design so the shape reads as an outline icon.
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
@@ -11,16 +10,16 @@
     android:viewportWidth="108"
     android:viewportHeight="108">
 
-    <!-- White card (rounded rect, within safe zone) -->
+    <!-- Card outline -->
     <path
-        android:fillColor="#FFFFFF"
-        android:strokeColor="#D8D8E8"
-        android:strokeWidth="1.5"
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="3"
         android:pathData="M30,33 H78 A8,8 0 0 1 86,41 V67 A8,8 0 0 1 78,75 H30 A8,8 0 0 1 22,67 V41 A8,8 0 0 1 30,33 Z"/>
 
-    <!-- Three 6-arm asterisks (brand colour strokes) -->
+    <!-- Three 6-arm asterisks -->
     <path
-        android:strokeColor="#1A1A2E"
+        android:strokeColor="#FFFFFF"
         android:strokeWidth="2.8"
         android:strokeLineCap="round"
         android:fillColor="@android:color/transparent"
@@ -35,9 +34,9 @@
             M59.94,50.5 L72.06,57.5
             M59.94,57.5 L72.06,50.5"/>
 
-    <!-- Cursor bar (brand colour fill) -->
+    <!-- Cursor bar -->
     <path
-        android:fillColor="#1A1A2E"
+        android:fillColor="#FFFFFF"
         android:pathData="M74,38 A2,2 0 0 1 76,40 L76,68 A2,2 0 0 1 74,70 L73,70 A2,2 0 0 1 71,68 L71,40 A2,2 0 0 1 73,38 Z"/>
 
 </vector>
