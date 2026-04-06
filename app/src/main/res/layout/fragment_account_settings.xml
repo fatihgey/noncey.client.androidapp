@@ -14,7 +14,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Spool"
+            android:text="Spool for Forward to Server"
             android:textSize="13sp"
             android:textColor="#888"
             android:textAllCaps="true"
@@ -50,7 +50,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Phone"
+            android:text="Canonical Phone Number Formatting"
             android:textSize="13sp"
             android:textColor="#888"
             android:textAllCaps="true"
@@ -60,7 +60,7 @@
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Country calling code (e.g. 49 for Germany)"
+            android:hint="Your country code (e.g. 49 for Germany)"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_marginBottom="4dp">
             <com.google.android.material.textfield.TextInputEditText
