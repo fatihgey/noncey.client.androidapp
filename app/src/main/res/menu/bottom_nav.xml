@@ -11,4 +11,9 @@
         android:icon="@drawable/ic_account"
         android:title="Account" />
 
+    <item
+        android:id="@+id/traceFragment"
+        android:icon="@drawable/ic_trace"
+        android:title="Trace" />
+
 </menu>

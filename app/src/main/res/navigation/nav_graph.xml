@@ -14,4 +14,9 @@
         android:name="com.noncey.android.ui.account.AccountFragment"
         android:label="Account" />
 
+    <fragment
+        android:id="@+id/traceFragment"
+        android:name="com.noncey.android.ui.trace.TraceFragment"
+        android:label="Trace" />
+
 </navigation>

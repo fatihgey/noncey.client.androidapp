@@ -56,8 +56,14 @@ class SmsReceiver : BroadcastReceiver() {
         // Ensure the cache is fresh before matching (handles cold-start after process kill)
         runBlocking { app.cache.refreshIfStale() }
 
-        // Check against cached matchers; drop if no active config matches
-        if (!app.cache.matchesSms(senderPhone, body)) return
+        // Check against cached matchers; log result and drop if no active config matches
+        val matchedConfig = app.cache.matchSmsConfig(senderPhone, body)
+        if (matchedConfig == null) {
+            val preview = body.take(40).replace('\n', ' ')
+            app.traceLog.add("No match: from=$senderPhone  body=\"$preview\"")
+            return
+        }
+        app.traceLog.add("Forwarded: from=$senderPhone → '${matchedConfig.name}'")
 
         // Mark the SMS as Read in the system inbox
         markAsRead(context, rawSender, body)

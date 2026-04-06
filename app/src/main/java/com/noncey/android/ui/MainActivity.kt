@@ -50,6 +50,7 @@ class MainActivity : AppCompatActivity() {
             val tabName = when (dest.id) {
                 R.id.smsListFragment -> "SMS"
                 R.id.accountFragment -> "Account"
+                R.id.traceFragment   -> "Trace"
                 else -> ""
             }
             // M2 = 3-char gap between icon and tab name (no dash)

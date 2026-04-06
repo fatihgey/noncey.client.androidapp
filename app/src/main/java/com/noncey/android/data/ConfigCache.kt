@@ -30,16 +30,15 @@ class ConfigCache(
     fun allConfigs(): List<SmsConfig> = configs
 
     /**
-     * Returns true if *senderPhone* + *body* matches any active config matcher.
-     * A matcher fires when:
+     * Returns the first active config whose matchers fire for [senderPhone] + [body],
+     * or null if none match.  A matcher fires when:
      *   - sender_phone matches (if set), AND
      *   - body_pattern matches (if set) according to body_match_type.
      * Thread-safe; reads from the in-memory snapshot.
      */
-    fun matchesSms(senderPhone: String, body: String): Boolean =
-        configs.any { cfg ->
-            if (!cfg.activated) return@any false
-            cfg.matchers.any { m ->
+    fun matchSmsConfig(senderPhone: String, body: String): SmsConfig? =
+        configs.firstOrNull { cfg ->
+            cfg.activated && cfg.matchers.any { m ->
                 val senderOk = m.sender_phone == null || m.sender_phone == senderPhone
                 val bodyOk = when {
                     m.body_pattern == null -> true
@@ -50,6 +49,9 @@ class ConfigCache(
                 senderOk && bodyOk
             }
         }
+
+    fun matchesSms(senderPhone: String, body: String): Boolean =
+        matchSmsConfig(senderPhone, body) != null
 
     /**
      * Refresh from the daemon if the cache is stale.  Call from a coroutine.

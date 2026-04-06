@@ -7,6 +7,7 @@ import com.noncey.android.data.ApiClient
 import com.noncey.android.data.ConfigCache
 import com.noncey.android.data.Prefs
 import com.noncey.android.data.SpoolDb
+import com.noncey.android.data.TraceLog
 
 class NonceyApp : Application() {
 
@@ -16,10 +17,11 @@ class NonceyApp : Application() {
             private set
     }
 
-    val prefs by lazy { Prefs(this) }
-    val db     by lazy { SpoolDb.build(this) }
-    val api    by lazy { ApiClient.build(prefs) }
-    val cache  by lazy { ConfigCache(api, prefs) }
+    val prefs    by lazy { Prefs(this) }
+    val db       by lazy { SpoolDb.build(this) }
+    val api      by lazy { ApiClient.build(prefs) }
+    val cache    by lazy { ConfigCache(api, prefs) }
+    val traceLog by lazy { TraceLog(this) }
 
     override fun onCreate() {
         super.onCreate()
