@@ -5,21 +5,25 @@ plugins {
 }
 
 // ── Version from git ──────────────────────────────────────────────────────────
-def gitOutput = { List<String> args ->
+def gitOutput = { String... args ->
     try {
-        def proc = (["git"] + args).execute(null, rootDir)
+        def cmd = ["git"] + args.toList()
+        def proc = new ProcessBuilder(cmd)
+                .directory(rootDir)
+                .redirectErrorStream(true)
+                .start()
         proc.waitFor()
         proc.exitValue() == 0 ? proc.text.trim() : ""
     } catch (ignored) { "" }
 }
-def rawTag      = gitOutput(["describe", "--tags", "--abbrev=0"])
-def gitHash     = gitOutput(["rev-parse", "--short", "HEAD"])
+def rawTag        = gitOutput("describe", "--tags", "--abbrev=0")
+def gitHash       = gitOutput("rev-parse", "--short", "HEAD")
 def formalVersion = rawTag ? rawTag.replaceAll(/^v/, '') : "1.0.0"
 if (!formalVersion) formalVersion = "1.0.0"
 if (!gitHash)       gitHash       = "unknown"
-def displayVersion  = "${formalVersion}+${gitHash}"
-def commitCountStr  = gitOutput(["rev-list", "--count", "HEAD"])
-def versionCodeNum  = (commitCountStr?.isInteger()) ? commitCountStr.toInteger() : 1
+def displayVersion = "${formalVersion}+${gitHash}"
+def commitCountStr = gitOutput("rev-list", "--count", "HEAD")
+def versionCodeNum = (commitCountStr?.isInteger()) ? commitCountStr.toInteger() : 1
 
 // Load signing config from keystore.properties (not committed to git)
 def keystorePropsFile = rootProject.file("keystore.properties")
