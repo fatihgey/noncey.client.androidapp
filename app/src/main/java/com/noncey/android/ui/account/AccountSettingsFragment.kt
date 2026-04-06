@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import com.noncey.android.BuildConfig
 import com.noncey.android.NonceyApp
 import com.noncey.android.databinding.FragmentAccountSettingsBinding
 
@@ -24,6 +25,8 @@ class AccountSettingsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         val app = requireContext().applicationContext as NonceyApp
+
+        binding.tvVersion.text = "App Version: v${BuildConfig.DISPLAY_VERSION}"
 
         binding.etSpoolRetention.setText(app.prefs.spoolRetentionMinutes.toString())
         binding.etSpoolRetry.setText(app.prefs.spoolRetrySeconds.toString())
