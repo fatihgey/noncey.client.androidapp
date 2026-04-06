@@ -15,6 +15,7 @@ import com.noncey.android.util.PhoneNormalizer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import java.time.Instant
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
@@ -51,6 +52,9 @@ class SmsReceiver : BroadcastReceiver() {
             simCountry,
             app.prefs.countryCallingCode
         )
+
+        // Ensure the cache is fresh before matching (handles cold-start after process kill)
+        runBlocking { app.cache.refreshIfStale() }
 
         // Check against cached matchers; drop if no active config matches
         if (!app.cache.matchesSms(senderPhone, body)) return
