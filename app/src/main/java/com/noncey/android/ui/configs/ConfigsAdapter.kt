@@ -41,8 +41,20 @@ class ConfigsAdapter(
             )
 
             // Matcher info summary
-            b.tvMatcherInfo.text = if (config.senderPhones.isEmpty()) "No matcher configured"
-            else "By sender: ${config.senderPhones.joinToString(", ")}"
+            b.tvMatcherInfo.text = if (config.matchers.isEmpty()) {
+                "No matcher configured"
+            } else {
+                config.matchers.joinToString(" | ") { m ->
+                    buildString {
+                        if (m.sender_phone != null) append("From: ${m.sender_phone}")
+                        if (m.body_pattern != null) {
+                            if (isNotEmpty()) append(", ")
+                            val typeLabel = if (m.body_match_type == "starts_with") "starts" else "~"
+                            append("Body $typeLabel: ${m.body_pattern}")
+                        }
+                    }.ifEmpty { "Any" }
+                }
+            }
         }
     }
 

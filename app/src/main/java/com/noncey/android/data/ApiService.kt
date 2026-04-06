@@ -8,6 +8,12 @@ import retrofit2.http.*
 data class LoginRequest(val username: String, val password: String, val client_type: String = "android")
 data class LoginResponse(val token: String, val expires_at: String)
 
+data class SmsMatcher(
+    val sender_phone: String?,
+    val body_pattern: String?,
+    val body_match_type: String?
+)
+
 data class ConfigResponse(
     val id: Int,
     val name: String,
@@ -17,7 +23,7 @@ data class ConfigResponse(
     val activated: Boolean?,
     val is_owned: Boolean,
     val channel_types: List<String>,
-    val sms_senders: List<String>,
+    val sms_matchers: List<SmsMatcher>,
     val prompt: PromptData?
 )
 

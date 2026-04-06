@@ -52,8 +52,8 @@ class SmsReceiver : BroadcastReceiver() {
             app.prefs.countryCallingCode
         )
 
-        // Check against cached sender matchers; drop if no active config matches
-        if (!app.cache.matchesSender(senderPhone)) return
+        // Check against cached matchers; drop if no active config matches
+        if (!app.cache.matchesSms(senderPhone, body)) return
 
         // Mark the SMS as Read in the system inbox
         markAsRead(context, rawSender, body)

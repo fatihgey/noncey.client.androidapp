@@ -8,7 +8,7 @@ import kotlinx.coroutines.withContext
  *
  * Used by SmsReceiver (on the main/receiver thread) to gate auto-forward
  * without a network round-trip.  The cache holds only the data needed for
- * matching: config id, activated flag, and the list of sender phone numbers.
+ * matching: config id, activated flag, and the list of SMS matchers.
  */
 class ConfigCache(
     private val api: ApiService,
@@ -19,7 +19,7 @@ class ConfigCache(
         val name: String,
         val activated: Boolean,
         val isOwned: Boolean,
-        val senderPhones: List<String>
+        val matchers: List<SmsMatcher>
     )
 
     @Volatile private var configs: List<SmsConfig> = emptyList()
@@ -30,11 +30,26 @@ class ConfigCache(
     fun allConfigs(): List<SmsConfig> = configs
 
     /**
-     * Returns true if *senderPhone* matches any sender in an active config.
+     * Returns true if *senderPhone* + *body* matches any active config matcher.
+     * A matcher fires when:
+     *   - sender_phone matches (if set), AND
+     *   - body_pattern matches (if set) according to body_match_type.
      * Thread-safe; reads from the in-memory snapshot.
      */
-    fun matchesSender(senderPhone: String): Boolean =
-        configs.any { it.activated && senderPhone in it.senderPhones }
+    fun matchesSms(senderPhone: String, body: String): Boolean =
+        configs.any { cfg ->
+            if (!cfg.activated) return@any false
+            cfg.matchers.any { m ->
+                val senderOk = m.sender_phone == null || m.sender_phone == senderPhone
+                val bodyOk = when {
+                    m.body_pattern == null -> true
+                    m.body_match_type == "starts_with" -> body.startsWith(m.body_pattern)
+                    m.body_match_type == "regex" -> Regex(m.body_pattern).containsMatchIn(body)
+                    else -> true
+                }
+                senderOk && bodyOk
+            }
+        }
 
     /**
      * Refresh from the daemon if the cache is stale.  Call from a coroutine.
@@ -57,11 +72,11 @@ class ConfigCache(
                     .filter { cfg -> cfg.channel_types.contains("sms") }
                     .map { cfg ->
                         SmsConfig(
-                            id           = cfg.id,
-                            name         = cfg.name,
-                            activated    = cfg.activated ?: false,
-                            isOwned      = cfg.is_owned,
-                            senderPhones = cfg.sms_senders
+                            id        = cfg.id,
+                            name      = cfg.name,
+                            activated = cfg.activated ?: false,
+                            isOwned   = cfg.is_owned,
+                            matchers  = cfg.sms_matchers
                         )
                     }
                 lastRefreshMs = System.currentTimeMillis()
