@@ -66,6 +66,8 @@ class ConfigsFragment : Fragment() {
                     else                  app.api.activate(config.id)
                 }
                 if (resp.isSuccessful) {
+                    val action = if (config.activated) "deactivated" else "activated"
+                    app.traceLog.add("Config $action: '${config.name}'")
                     app.cache.invalidate()
                     refreshConfigs(force = true)
                 } else {

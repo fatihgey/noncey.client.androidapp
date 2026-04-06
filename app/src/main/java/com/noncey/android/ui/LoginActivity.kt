@@ -58,6 +58,7 @@ class LoginActivity : AppCompatActivity() {
                     app.prefs.token          = body.token
                     app.prefs.tokenExpiresAt = body.expires_at
                     app.prefs.username       = username
+                    app.traceLog.add("Login: user=$username url=$url")
                     // Refresh config cache immediately after login
                     withContext(Dispatchers.IO) { app.cache.refresh() }
                     startMain()

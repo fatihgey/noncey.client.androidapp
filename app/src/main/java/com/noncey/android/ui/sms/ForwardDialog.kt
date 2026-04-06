@@ -61,6 +61,8 @@ class ForwardDialog : BottomSheetDialogFragment() {
             ForwardService.enqueueAndStart(
                 requireContext(), sender, item.body, item.receivedAt, configId
             )
+            val configLabel = if (configId == null) "server-chosen" else configs[selectedIndex - 1].name
+            app.traceLog.add("Manual forward: from=$sender → config=\"$configLabel\"")
             Toast.makeText(requireContext(), "Queued for forwarding.", Toast.LENGTH_SHORT).show()
             dismiss()
         }

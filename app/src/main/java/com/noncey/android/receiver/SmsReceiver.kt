@@ -26,8 +26,6 @@ class SmsReceiver : BroadcastReceiver() {
         if (intent.action != Telephony.Sms.Intents.SMS_RECEIVED_ACTION) return
 
         val app = context.applicationContext as NonceyApp
-        if (!app.prefs.autoForwardEnabled) return
-        if (!app.prefs.isLoggedIn()) return
 
         val pdus = intent.extras?.get("pdus") as? Array<*> ?: return
         val format = intent.getStringExtra("format") ?: "3gpp"
@@ -53,17 +51,28 @@ class SmsReceiver : BroadcastReceiver() {
             app.prefs.countryCallingCode
         )
 
+        val preview = body.take(40).replace('\n', ' ')
+
+        // Log every received SMS before any early-exit decision
+        if (!app.prefs.autoForwardEnabled) {
+            app.traceLog.add("SMS received: from=$senderPhone  body=\"$preview\" → skipped (auto-forward disabled)")
+            return
+        }
+        if (!app.prefs.isLoggedIn()) {
+            app.traceLog.add("SMS received: from=$senderPhone  body=\"$preview\" → skipped (not logged in)")
+            return
+        }
+
         // Ensure the cache is fresh before matching (handles cold-start after process kill)
         runBlocking { app.cache.refreshIfStale() }
 
         // Check against cached matchers; log result and drop if no active config matches
         val matchedConfig = app.cache.matchSmsConfig(senderPhone, body)
         if (matchedConfig == null) {
-            val preview = body.take(40).replace('\n', ' ')
-            app.traceLog.add("No match: from=$senderPhone  body=\"$preview\"")
+            app.traceLog.add("SMS received: from=$senderPhone  body=\"$preview\" → no matching config")
             return
         }
-        app.traceLog.add("Forwarded: from=$senderPhone → '${matchedConfig.name}'")
+        app.traceLog.add("SMS received: from=$senderPhone  body=\"$preview\" → forwarding via '${matchedConfig.name}'")
 
         // Mark the SMS as Read in the system inbox
         markAsRead(context, rawSender, body)
