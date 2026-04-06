@@ -1,9 +1,14 @@
 package com.noncey.android.ui
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
+import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.core.content.ContextCompat
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.noncey.android.NonceyApp
@@ -13,6 +18,17 @@ import com.noncey.android.databinding.ActivityMainBinding
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
+
+    private val receiveSmsPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            if (!granted) {
+                Toast.makeText(
+                    this,
+                    "SMS receive permission denied — auto-forward will not work.",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,6 +48,11 @@ class MainActivity : AppCompatActivity() {
         val navController = navHost.navController
 
         binding.bottomNav.setupWithNavController(navController)
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECEIVE_SMS)
+                != PackageManager.PERMISSION_GRANTED) {
+            receiveSmsPermissionLauncher.launch(Manifest.permission.RECEIVE_SMS)
+        }
 
         supportActionBar?.apply {
             setDisplayShowHomeEnabled(true)

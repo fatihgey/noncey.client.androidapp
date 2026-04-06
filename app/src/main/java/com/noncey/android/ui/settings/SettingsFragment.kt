@@ -59,12 +59,10 @@ class SettingsFragment : Fragment() {
             app.prefs.countryCallingCode    = code
             app.prefs.autoForwardEnabled    = binding.switchAutoForward.isChecked
 
-            app.traceLog.add("Settings saved: url=$url retention=${retention}m retry=${retry}s countryCode=$code autoForward=${binding.switchAutoForward.isChecked}")
             Toast.makeText(requireContext(), "Settings saved.", Toast.LENGTH_SHORT).show()
         }
 
         binding.btnLogout.setOnClickListener {
-            app.traceLog.add("Logout: user=${app.prefs.username}")
             app.prefs.clear()
             app.cache.invalidate()
             startActivity(Intent(requireContext(), LoginActivity::class.java).apply {

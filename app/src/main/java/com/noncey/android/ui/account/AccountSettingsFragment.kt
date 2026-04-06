@@ -49,6 +49,7 @@ class AccountSettingsFragment : Fragment() {
             app.prefs.countryCallingCode    = code
             app.prefs.autoForwardEnabled    = binding.switchAutoForward.isChecked
 
+            app.traceLog.add("Settings saved: retention=${retention}m retry=${retry}s countryCode=$code autoForward=${binding.switchAutoForward.isChecked}")
             Toast.makeText(requireContext(), "Settings saved.", Toast.LENGTH_SHORT).show()
         }
     }

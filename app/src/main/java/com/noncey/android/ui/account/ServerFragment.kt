@@ -36,6 +36,8 @@ class ServerFragment : Fragment() {
         binding.etUrl.setText(app.prefs.daemonUrl)
         binding.etUsername.setText(app.prefs.username)
 
+        updateButtonState(app.prefs.isLoggedIn())
+
         binding.btnConnect.setOnClickListener {
             val url      = binding.etUrl.text.toString().trim().trimEnd('/')
             val username = binding.etUsername.text.toString().trim()
@@ -70,6 +72,8 @@ class ServerFragment : Fragment() {
                         app.prefs.username       = username
                         withContext(Dispatchers.IO) { app.cache.refresh() }
                         binding.etPassword.text?.clear()
+                        app.traceLog.add("Login: user=$username url=$url")
+                        updateButtonState(true)
                         Toast.makeText(requireContext(), "Connected.", Toast.LENGTH_SHORT).show()
                     } else {
                         Toast.makeText(requireContext(),
@@ -79,18 +83,24 @@ class ServerFragment : Fragment() {
                     Toast.makeText(requireContext(),
                         "Cannot reach daemon: ${e.message}", Toast.LENGTH_LONG).show()
                 } finally {
-                    binding.btnConnect.isEnabled = true
+                    if (!app.prefs.isLoggedIn()) binding.btnConnect.isEnabled = true
                 }
             }
         }
 
         binding.btnLogout.setOnClickListener {
+            app.traceLog.add("Logout: user=${app.prefs.username}")
             app.prefs.clear()
             app.cache.invalidate()
             startActivity(Intent(requireContext(), LoginActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             })
         }
+    }
+
+    private fun updateButtonState(loggedIn: Boolean) {
+        binding.btnConnect.visibility = if (loggedIn) View.GONE else View.VISIBLE
+        binding.btnLogout.visibility  = if (loggedIn) View.VISIBLE else View.GONE
     }
 
     override fun onDestroyView() {

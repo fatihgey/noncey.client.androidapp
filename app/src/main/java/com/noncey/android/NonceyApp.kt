@@ -3,6 +3,7 @@ package com.noncey.android
 import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.util.Log
 import com.noncey.android.data.ApiClient
 import com.noncey.android.data.ConfigCache
 import com.noncey.android.data.Prefs
@@ -26,6 +27,7 @@ class NonceyApp : Application() {
     override fun onCreate() {
         super.onCreate()
         instance = this
+        Log.i("NonceyBuild", "Build time: ${java.util.Date(BuildConfig.BUILD_TIME)}")
         createNotificationChannels()
     }
 
