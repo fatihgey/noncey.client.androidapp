@@ -176,3 +176,9 @@ After installing the app:
 2. Grant **SMS** permissions when prompted.
 3. The app runs a foreground service; keep battery optimisation disabled for it
    (**Settings → Battery → noncey → Unrestricted**) to ensure reliable forwarding.
+
+---
+
+## License
+
+MIT — see [LICENSE](LICENSE).
