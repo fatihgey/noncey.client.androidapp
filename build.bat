@@ -3,6 +3,7 @@ REM Build script for noncey Android app
 REM Usage:
 REM   build.bat             — debug APK
 REM   build.bat release     — signed release APK (requires keystore.properties)
+REM   build.bat bundle      — signed release AAB for Play Store (requires keystore.properties)
 REM   build.bat install-emu — adb install -r to the first connected emulator
 REM   build.bat install-phone   — adb install -r to the first connected physical device
 REM   build.bat uninstall-phone — adb uninstall from the first connected physical device
@@ -128,8 +129,13 @@ if not exist "gradle\wrapper\gradle-wrapper.jar" (
     if %ERRORLEVEL% neq 0 exit /b %ERRORLEVEL%
 )
 
-REM ── Release: verify keystore ──────────────────────────────────────────────────
+REM ── Release/Bundle: verify keystore ──────────────────────────────────────────
 
+if "%MODE%"=="release" goto :check_keystore
+if "%MODE%"=="bundle" goto :check_keystore
+goto :after_keystore_check
+
+:check_keystore
 if "%MODE%"=="release" (
     if not exist "keystore.properties" (
         echo ERROR: keystore.properties not found.
@@ -142,6 +148,20 @@ if "%MODE%"=="release" (
         exit /b 1
     )
 )
+if "%MODE%"=="bundle" (
+    if not exist "keystore.properties" (
+        echo ERROR: keystore.properties not found.
+        echo.
+        echo To create a signing keystore ^(one-time^):
+        echo   keytool -genkey -v -keystore noncey.keystore -alias noncey ^
+        echo           -keyalg RSA -keysize 2048 -validity 10000
+        echo.
+        echo Then copy keystore.properties.example -^> keystore.properties and fill in the values.
+        exit /b 1
+    )
+)
+
+:after_keystore_check
 
 REM ── Build ─────────────────────────────────────────────────────────────────────
 
@@ -149,16 +169,26 @@ if "%MODE%"=="release" (
     echo Building release APK...
     call gradlew.bat assembleRelease
     if %ERRORLEVEL% neq 0 exit /b %ERRORLEVEL%
-    set "APK_PATH=app\build\outputs\apk\release\app-release.apk"
+    set "OUT_PATH=app\build\outputs\apk\release\app-release.apk"
+    echo.
+    echo Build successful.
+    echo APK: %SCRIPT_DIR%%OUT_PATH%
+) else if "%MODE%"=="bundle" (
+    echo Building release AAB...
+    call gradlew.bat bundleRelease
+    if %ERRORLEVEL% neq 0 exit /b %ERRORLEVEL%
+    set "OUT_PATH=app\build\outputs\bundle\release\app-release.aab"
+    echo.
+    echo Build successful.
+    echo AAB: %SCRIPT_DIR%%OUT_PATH%
 ) else (
     echo Building debug APK...
     call gradlew.bat assembleDebug
     if %ERRORLEVEL% neq 0 exit /b %ERRORLEVEL%
-    set "APK_PATH=app\build\outputs\apk\debug\app-debug.apk"
+    set "OUT_PATH=app\build\outputs\apk\debug\app-debug.apk"
+    echo.
+    echo Build successful.
+    echo APK: %SCRIPT_DIR%%OUT_PATH%
 )
-
-echo.
-echo Build successful.
-echo APK: %SCRIPT_DIR%%APK_PATH%
 
 endlocal
