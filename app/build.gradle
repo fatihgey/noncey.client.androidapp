@@ -34,12 +34,12 @@ if (keystorePropsFile.exists()) {
 
 android {
     namespace 'com.noncey.android'
-    compileSdk 34
+    compileSdk 35
 
     defaultConfig {
         applicationId "com.noncey.android"
         minSdk 26
-        targetSdk 34
+        targetSdk 35
         versionCode versionCodeNum
         versionName formalVersion
         buildConfigField "long",   "BUILD_TIME",       "${System.currentTimeMillis()}L"
