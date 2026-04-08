@@ -10,6 +10,9 @@
     <!-- WRITE_SMS / MANAGE_SMS: mark forwarded messages as Read -->
     <uses-permission android:name="android.permission.WRITE_SMS" />
 
+    <!-- Require telephony (phone calls / SMS) — restricts to phones, excludes tablets/TVs -->
+    <uses-feature android:name="android.hardware.telephony" android:required="true" />
+
     <application
         android:name=".NonceyApp"
         android:allowBackup="false"
