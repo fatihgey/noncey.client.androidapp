@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<d:devices xmlns:d="http://schemas.android.com/sdk/devices/1">
+  <d:device>
+    <d:name>Custom 10 inch Tablet</d:name>
+    <d:hardware>
+      <d:screen>
+        <d:screen-size>xlarge</d:screen-size>
+        <d:diagonal-length>10.1</d:diagonal-length>
+        <d:pixel-density>240</d:pixel-density>
+        <d:resolution>2560x1600</d:resolution>
+      </d:screen>
+      <d:ram>4096</d:ram>
+    </d:hardware>
+  </d:device>
+</d:devices>
