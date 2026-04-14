@@ -191,4 +191,50 @@ if "%MODE%"=="release" (
     echo APK: %SCRIPT_DIR%%OUT_PATH%
 )
 
+REM ── Publish release artifacts (release mode only) ─────────────────────────
+
+if not "%MODE%"=="release" goto :publish_done
+
+REM Derive version
+git describe --tags --abbrev=0 > "%TEMP%\noncey_tag.tmp" 2>nul
+set /p GIT_TAG= < "%TEMP%\noncey_tag.tmp"
+del "%TEMP%\noncey_tag.tmp" 2>nul
+git rev-parse --short HEAD > "%TEMP%\noncey_hash.tmp" 2>nul
+set /p GIT_HASH= < "%TEMP%\noncey_hash.tmp"
+del "%TEMP%\noncey_hash.tmp" 2>nul
+if "%GIT_TAG%"=="" set "GIT_TAG=1.0.0"
+if "%GIT_HASH%"=="" set "GIT_HASH=unknown"
+set "FORMAL_VER=%GIT_TAG%"
+if "%FORMAL_VER:~0,1%"=="v" set "FORMAL_VER=%FORMAL_VER:~1%"
+set "FILE_VERSION=%FORMAL_VER%-%GIT_HASH%"
+
+REM Create versioned APK copy
+set "RELEASE_DIR=app\build\outputs\apk\release"
+set "VERSIONED_APK=noncey-android-app-v%FILE_VERSION%.apk"
+set "VERSIONED_INI=noncey-android-app-v%FILE_VERSION%.ini"
+copy /Y "%RELEASE_DIR%\app-release.apk" "%RELEASE_DIR%\%VERSIONED_APK%" >nul
+echo Versioned APK: %RELEASE_DIR%\%VERSIONED_APK%
+
+REM Create INI file
+powershell -NoProfile -Command "[DateTime]::Now.ToString('yyyy-MM-ddTHH:mm:sszzz')" > "%TEMP%\noncey_time.tmp"
+set /p BUILD_TIME= < "%TEMP%\noncey_time.tmp"
+del "%TEMP%\noncey_time.tmp" 2>nul
+echo [main]> "%RELEASE_DIR%\%VERSIONED_INI%"
+echo version=%FILE_VERSION%>> "%RELEASE_DIR%\%VERSIONED_INI%"
+echo modified=%BUILD_TIME%>> "%RELEASE_DIR%\%VERSIONED_INI%"
+
+REM Upload to server
+set "REMOTE_HOST=sigma.geneso.de"
+set "REMOTE_DIR=/home_web/r-programming.de/wwwroot/download"
+echo Uploading %VERSIONED_APK% to %REMOTE_HOST%...
+plink -batch %REMOTE_HOST% "mkdir -p %REMOTE_DIR%"
+pscp -batch "%RELEASE_DIR%\%VERSIONED_APK%" "%REMOTE_HOST%:%REMOTE_DIR%/"
+if %ERRORLEVEL% neq 0 ( echo ERROR: Upload of APK failed. & exit /b 1 )
+pscp -batch "%RELEASE_DIR%\%VERSIONED_INI%" "%REMOTE_HOST%:%REMOTE_DIR%/"
+if %ERRORLEVEL% neq 0 ( echo ERROR: Upload of INI failed. & exit /b 1 )
+plink -batch %REMOTE_HOST% "cd %REMOTE_DIR% && ln -sf %VERSIONED_APK% noncey-android-app.apk && ln -sf %VERSIONED_INI% noncey-android-app.ini"
+if %ERRORLEVEL% neq 0 ( echo ERROR: Symlink update failed. & exit /b 1 )
+echo Uploaded and published as %VERSIONED_APK%.
+
+:publish_done
 endlocal
