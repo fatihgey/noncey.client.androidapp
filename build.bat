@@ -227,12 +227,12 @@ REM Upload to server
 set "REMOTE_HOST=sigma.geneso.de"
 set "REMOTE_DIR=/home_web/r-programming.de/wwwroot/download"
 echo Uploading %VERSIONED_APK% to %REMOTE_HOST%...
-plink -batch -auto-store-sshkey %REMOTE_HOST% "mkdir -p %REMOTE_DIR%"
-pscp -batch -auto-store-sshkey "%RELEASE_DIR%\%VERSIONED_APK%" "%REMOTE_HOST%:%REMOTE_DIR%/"
+plink %REMOTE_HOST% "mkdir -p %REMOTE_DIR%"
+pscp "%RELEASE_DIR%\%VERSIONED_APK%" "%REMOTE_HOST%:%REMOTE_DIR%/"
 if %ERRORLEVEL% neq 0 ( echo ERROR: Upload of APK failed. & exit /b 1 )
-pscp -batch -auto-store-sshkey "%RELEASE_DIR%\%VERSIONED_INI%" "%REMOTE_HOST%:%REMOTE_DIR%/"
+pscp "%RELEASE_DIR%\%VERSIONED_INI%" "%REMOTE_HOST%:%REMOTE_DIR%/"
 if %ERRORLEVEL% neq 0 ( echo ERROR: Upload of INI failed. & exit /b 1 )
-plink -batch -auto-store-sshkey %REMOTE_HOST% "cd %REMOTE_DIR% && ln -sf %VERSIONED_APK% noncey-android-app.apk && ln -sf %VERSIONED_INI% noncey-android-app.ini"
+plink %REMOTE_HOST% "cd %REMOTE_DIR% && ln -sf %VERSIONED_APK% noncey-android-app.apk && ln -sf %VERSIONED_INI% noncey-android-app.ini"
 if %ERRORLEVEL% neq 0 ( echo ERROR: Symlink update failed. & exit /b 1 )
 echo Uploaded and published as %VERSIONED_APK%.
 
