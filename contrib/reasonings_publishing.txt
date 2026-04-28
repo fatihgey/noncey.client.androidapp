@@ -1,0 +1,14 @@
+
+
+
+
+The app relays OTP SMS messages to a remote daemon. When a relevant SMS arrives, it is spooled and ForwardService is started to drain the spool via HTTP. The service stops itself (stopSelf()) as soon as the
+  spool is empty — it is not persistent.
+
+  Two alternatives were considered:
+
+  - Inline in BroadcastReceiver: Android limits onReceive() to ~10 seconds, which is insufficient for network I/O with retry logic.
+  - WorkManager: Execution timing is OS-controlled and may be deferred by minutes under Doze/battery saver — unacceptable for an OTP relay where the user is waiting at a login screen.
+
+  The foreground service is therefore the only mechanism that provides immediate, guaranteed execution on SMS arrival. Resource usage is proportional to actual SMS volume: for the expected 1–5 messages/day, the
+   service is active for only a few seconds per message.
