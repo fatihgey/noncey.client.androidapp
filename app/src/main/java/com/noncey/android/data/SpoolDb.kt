@@ -3,7 +3,7 @@ package com.noncey.android.data
 import android.content.Context
 import androidx.room.*
 
-// ── Entity ────────────────────────────────────────────────────────────────────
+// ── Spool entity ──────────────────────────────────────────────────────────────
 
 @Entity(tableName = "spool")
 data class SpoolEntry(
@@ -14,8 +14,6 @@ data class SpoolEntry(
     val enqueuedAt: Long,           // System.currentTimeMillis()
     val configId: Int? = null       // non-null when manually funnelled into a config
 )
-
-// ── DAO ───────────────────────────────────────────────────────────────────────
 
 @Dao
 interface SpoolDao {
@@ -35,11 +33,52 @@ interface SpoolDao {
     suspend fun count(): Int
 }
 
+// ── Cached config entity ──────────────────────────────────────────────────────
+
+@Entity(tableName = "cached_configs")
+data class CachedConfigEntry(
+    @PrimaryKey val configId: Int,
+    val name: String,
+    val activated: Boolean,
+    val isOwned: Boolean,
+    val matchersJson: String        // Gson JSON: List<SmsMatcher>
+)
+
+@Dao
+interface CachedConfigDao {
+    @Query("SELECT * FROM cached_configs")
+    suspend fun getAll(): List<CachedConfigEntry>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAll(entries: List<CachedConfigEntry>)
+
+    @Query("DELETE FROM cached_configs")
+    suspend fun deleteAll()
+}
+
 // ── Database ──────────────────────────────────────────────────────────────────
 
-@Database(entities = [SpoolEntry::class], version = 1, exportSchema = false)
+val MIGRATION_1_2 = object : androidx.room.migration.Migration(1, 2) {
+    override fun migrate(db: androidx.sqlite.db.SupportSQLiteDatabase) {
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS cached_configs (" +
+            "configId INTEGER NOT NULL PRIMARY KEY, " +
+            "name TEXT NOT NULL, " +
+            "activated INTEGER NOT NULL, " +
+            "isOwned INTEGER NOT NULL, " +
+            "matchersJson TEXT NOT NULL)"
+        )
+    }
+}
+
+@Database(
+    entities = [SpoolEntry::class, CachedConfigEntry::class],
+    version  = 2,
+    exportSchema = false
+)
 abstract class SpoolDb : RoomDatabase() {
     abstract fun spoolDao(): SpoolDao
+    abstract fun cachedConfigDao(): CachedConfigDao
 
     companion object {
         @Volatile private var INSTANCE: SpoolDb? = null
@@ -50,7 +89,9 @@ abstract class SpoolDb : RoomDatabase() {
                     context.applicationContext,
                     SpoolDb::class.java,
                     "noncey_spool"
-                ).build().also { INSTANCE = it }
+                )
+                .addMigrations(MIGRATION_1_2)
+                .build().also { INSTANCE = it }
             }
     }
 }

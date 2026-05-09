@@ -35,6 +35,10 @@ class Prefs(context: Context) {
         get() = prefs.getString(KEY_EXPIRES, "") ?: ""
         set(v) = prefs.edit().putString(KEY_EXPIRES, v).apply()
 
+    var refreshToken: String
+        get() = prefs.getString(KEY_REFRESH_TOKEN, "") ?: ""
+        set(v) = prefs.edit().putString(KEY_REFRESH_TOKEN, v).apply()
+
     var username: String
         get() = prefs.getString(KEY_USERNAME, "") ?: ""
         set(v) = prefs.edit().putString(KEY_USERNAME, v).apply()
@@ -67,6 +71,7 @@ class Prefs(context: Context) {
         private const val KEY_URL            = "daemon_url"
         private const val KEY_TOKEN          = "token"
         private const val KEY_EXPIRES        = "token_expires_at"
+        private const val KEY_REFRESH_TOKEN  = "refresh_token"
         private const val KEY_USERNAME       = "username"
         private const val KEY_SPOOL_RETENTION = "spool_retention_min"
         private const val KEY_SPOOL_RETRY    = "spool_retry_sec"

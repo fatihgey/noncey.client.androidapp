@@ -50,10 +50,19 @@ class ConfigsFragment : Fragment() {
         val app = requireContext().applicationContext as NonceyApp
         lifecycleScope.launch {
             if (force) app.cache.refresh() else app.cache.refreshIfStale()
-            val configs = app.cache.allConfigs()
+            val configs   = app.cache.allConfigs()
+            val errorCode = app.cache.lastError
             adapter.submitList(configs)
-            binding.emptyText.visibility  = if (configs.isEmpty()) View.VISIBLE else View.GONE
             binding.swipeRefresh.isRefreshing = false
+            if (configs.isEmpty()) {
+                binding.emptyText.text = if (errorCode != null)
+                    "Failed to load configurations (HTTP $errorCode)"
+                else
+                    "No configurations yet."
+                binding.emptyText.visibility = View.VISIBLE
+            } else {
+                binding.emptyText.visibility = View.GONE
+            }
         }
     }
 

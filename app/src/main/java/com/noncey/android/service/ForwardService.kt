@@ -82,6 +82,9 @@ class ForwardService : Service() {
                 }
             }
 
+            // Authenticator cleared credentials after exhausting the refresh token
+            if (!app.prefs.isLoggedIn()) break
+
             if (!allOk) delay(retryMs)
         }
 

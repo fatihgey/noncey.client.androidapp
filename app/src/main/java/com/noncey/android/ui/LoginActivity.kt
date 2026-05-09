@@ -49,7 +49,7 @@ class LoginActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
                 app.prefs.daemonUrl = url
-                val service = ApiClient.rebuild(app.prefs)
+                val service = ApiClient.rebuild(this@LoginActivity, app.prefs)
                 val resp    = withContext(Dispatchers.IO) {
                     service.login(LoginRequest(username, password))
                 }
@@ -57,6 +57,7 @@ class LoginActivity : AppCompatActivity() {
                     val body = resp.body()!!
                     app.prefs.token          = body.token
                     app.prefs.tokenExpiresAt = body.expires_at
+                    app.prefs.refreshToken   = body.refresh_token
                     app.prefs.username       = username
                     // Refresh config cache immediately after login
                     withContext(Dispatchers.IO) { app.cache.refresh() }

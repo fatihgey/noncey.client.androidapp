@@ -6,7 +6,10 @@ import retrofit2.http.*
 // ── Request / response models ─────────────────────────────────────────────────
 
 data class LoginRequest(val username: String, val password: String, val client_type: String = "android")
-data class LoginResponse(val token: String, val expires_at: String)
+data class LoginResponse(val token: String, val expires_at: String, val refresh_token: String)
+
+data class RefreshRequest(val refresh_token: String)
+data class RefreshResponse(val token: String, val expires_at: String, val refresh_token: String)
 
 data class SmsMatcher(
     val sender_phone: String?,

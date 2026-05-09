@@ -1,5 +1,7 @@
 package com.noncey.android.data
 
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -9,10 +11,14 @@ import kotlinx.coroutines.withContext
  * Used by SmsReceiver (on the main/receiver thread) to gate auto-forward
  * without a network round-trip.  The cache holds only the data needed for
  * matching: config id, activated flag, and the list of SMS matchers.
+ *
+ * On first use the cache is seeded from Room (survives process kill); on each
+ * successful network refresh the Room copy is also updated.
  */
 class ConfigCache(
     private val api: ApiService,
-    private val prefs: Prefs
+    private val prefs: Prefs,
+    private val dao: CachedConfigDao
 ) {
     data class SmsConfig(
         val id: Int,
@@ -24,17 +30,19 @@ class ConfigCache(
 
     @Volatile private var configs: List<SmsConfig> = emptyList()
     @Volatile private var lastRefreshMs: Long = 0L
-    private val REFRESH_INTERVAL_MS = 60_000L   // 60 s
+    @Volatile private var persistenceLoaded = false
+    @Volatile var lastError: Int? = null
+
+    private val REFRESH_INTERVAL_MS = 60_000L
+    private val gson = Gson()
+    private val matcherListType = object : TypeToken<List<SmsMatcher>>() {}.type
 
     /** Full list of SMS-channel configs (owned + subscribed). Used by the Configs tab. */
     fun allConfigs(): List<SmsConfig> = configs
 
     /**
      * Returns the first active config whose matchers fire for [senderPhone] + [body],
-     * or null if none match.  A matcher fires when:
-     *   - sender_phone matches (if set), AND
-     *   - body_pattern matches (if set) according to body_match_type.
-     * Thread-safe; reads from the in-memory snapshot.
+     * or null if none match.  Thread-safe; reads from the in-memory snapshot.
      */
     fun matchSmsConfig(senderPhone: String, body: String): SmsConfig? =
         configs.firstOrNull { cfg ->
@@ -54,10 +62,11 @@ class ConfigCache(
         matchSmsConfig(senderPhone, body) != null
 
     /**
-     * Refresh from the daemon if the cache is stale.  Call from a coroutine.
-     * Safe to call redundantly — no-ops if called within the refresh interval.
+     * Refresh from the daemon if the cache is stale.  On first call, seeds the
+     * in-memory cache from Room so SMS matching works immediately after a cold start.
      */
     suspend fun refreshIfStale() {
+        if (!persistenceLoaded) loadFromPersistence()
         val now = System.currentTimeMillis()
         if (now - lastRefreshMs < REFRESH_INTERVAL_MS) return
         refresh()
@@ -70,7 +79,7 @@ class ConfigCache(
             val resp = api.getConfigs()
             if (resp.isSuccessful) {
                 val body = resp.body() ?: return@withContext
-                configs = body
+                val fresh = body
                     .filter { cfg -> cfg.channel_types.contains("sms") }
                     .map { cfg ->
                         SmsConfig(
@@ -81,7 +90,13 @@ class ConfigCache(
                             matchers  = cfg.sms_matchers
                         )
                     }
+                configs = fresh
                 lastRefreshMs = System.currentTimeMillis()
+                lastError = null
+                dao.deleteAll()
+                dao.insertAll(fresh.map { it.toCachedEntry() })
+            } else {
+                lastError = resp.code()
             }
         } catch (_: Exception) {
             // Network unavailable — keep stale cache
@@ -90,4 +105,28 @@ class ConfigCache(
 
     /** Invalidate the cache (e.g. after activate/deactivate). */
     fun invalidate() { lastRefreshMs = 0L }
+
+    private suspend fun loadFromPersistence() = withContext(Dispatchers.IO) {
+        val entries = dao.getAll()
+        if (entries.isNotEmpty()) {
+            configs = entries.map { it.toSmsConfig() }
+        }
+        persistenceLoaded = true
+    }
+
+    private fun SmsConfig.toCachedEntry() = CachedConfigEntry(
+        configId     = id,
+        name         = name,
+        activated    = activated,
+        isOwned      = isOwned,
+        matchersJson = gson.toJson(matchers)
+    )
+
+    private fun CachedConfigEntry.toSmsConfig() = SmsConfig(
+        id        = configId,
+        name      = name,
+        activated = activated,
+        isOwned   = isOwned,
+        matchers  = gson.fromJson(matchersJson, matcherListType)
+    )
 }
